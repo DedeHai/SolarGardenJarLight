@@ -1,9 +1,33 @@
+/*************************
+ SOLAR GARDEN JAR LIGHT 
+ 
+ by Damian Schneider
+ *************************
+
+ * Copyright (c) Damian Schneider 2017
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*
+Notes & Calculations:
 
-   15 ms, 30 ms, 60 ms, 120 ms, 250 ms, 500 ms, 1 s, 2 s, 4 s, 8 s, and forever
-
+  This code was tested and working using Arduino 1.6.8
+  It works on Arduinos using ATmega328 and ATmega168P (Arduino Pro-Mini)
+  
   solar cell power:
-  the solar cell delivers around 3-5mA when charging in the sade or light overcast. In full sunlight, it is probably more like 50mA.
+  the solar cell delivers around 3-5mA when charging in the shade or light overcast. In full sunlight, it is probably more like 50mA.
   when charging for about 10 hours on an average of 5mA this equals only 50mAh which powers the LEDs on reduced brightness for about two hours (assuming 25mA current). todo: test this some more
 
   Note: need to mention that only Atmega 328P and ATmega 168PA work with this code (tested, all processors with micro power work but may need an adjusted low power function)
@@ -25,7 +49,6 @@ todo:
   
 */
 
-//#define __AVR_ATmega168PA__
 
 #include <FastLED.h>
 #include <Wire.h> //I2C 
@@ -42,7 +65,7 @@ ADXL345 adxl = ADXL345();
 //#define SERIALDEBUG 1 //serial output debugging data if defined
 
 #define AUTOONATDAWN 1 //comment out this line if you do not want the light to automatically turn on at dawn
-#define AUTOPOWEROFFTIME 240 //time in minutes after which the light turns off automatically
+#define AUTOPOWEROFFTIME 120 //time in minutes after which the light turns off automatically
 
 #define LED_PIN     7 //LED data pin
 #define LEDPWR_PIN  6 //LED power pin (inverting, low means on)
@@ -255,15 +278,15 @@ void loop()
         lowVoltageWarning(); //blink and shutdown
       }
     }
-
-    if ((ontimeCounter / 1000) > AUTOPOWEROFFTIME)
+    
+    if ((ontimeCounter/256/1000) > AUTOPOWEROFFTIME)
     {
       switchLEDoff(true);
-
     }
 
 
   }
+
 
   /*****************************
      LOW POWER MODE STARTS HERE

@@ -1,9 +1,10 @@
-The MIT License (MIT)
 
-Copyright (c) 2016 Damian Schneider
+Copyright (c) 2017 Damian Schneider
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# License
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+This work is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/) unless stated otherwise in the file (software source code is GNU GPL V3 licensed).
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+It basically means you can do whatever you want with the material as long as it's for non-commercial use but you've got to attribute the original author ([Damian Schneider](http://github.com/DedeHai)) and share any derivative works under the same license.
+
+If you're interested in using the work for commercial purposes or otherwise licensing material, feel free to get in touch at [schneider.da@gmx.ch](schneider.da@gmx.ch).

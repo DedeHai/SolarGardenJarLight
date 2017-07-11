@@ -5,7 +5,7 @@ The Arduino is connected to an accelerometer to switch the light on and off and 
 More information available at https://bashtelorofscience.wordpress.com/ 
 
 License:
-Software under MIT license
+Software source code is GNU GPL V3 licensed
 Hardware under Creative Commons 4.0 license: CC-BY-NC-SA
 
 [![License: CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
