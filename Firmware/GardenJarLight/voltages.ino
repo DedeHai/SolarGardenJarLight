@@ -95,7 +95,7 @@ void checkVoltages(void)
   //check if it's dark, switch on if it is
 
   //check if it's dark outside (check this once per minute)
-  if (checkDarkness() && itsDarkOutside < 60) {
+  if (checkDarkness() && itsDarkOutside < 30) {
     itsDarkOutside++;
   }
   else if (itsDarkOutside > 0)

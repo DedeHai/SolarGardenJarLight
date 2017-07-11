@@ -1,31 +1,31 @@
 /*************************
- SOLAR GARDEN JAR LIGHT 
- 
- by Damian Schneider
+  SOLAR GARDEN JAR LIGHT
+
+  by Damian Schneider
  *************************
 
- * Copyright (c) Damian Schneider 2017
- *
- * This program is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
- */
+   Copyright (c) Damian Schneider 2017
+
+   This program is free software: you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free Software
+   Foundation, either version 3 of the License, or (at your option) any later
+   version.
+
+   This program is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+   FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+   details.
+
+   You should have received a copy of the GNU General Public License along with
+   this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /*
-Notes & Calculations:
+  Notes & Calculations:
 
   This code was tested and working using Arduino 1.6.8
   It works on Arduinos using ATmega328 and ATmega168P (Arduino Pro-Mini)
-  
+
   solar cell power:
   the solar cell delivers around 3-5mA when charging in the shade or light overcast. In full sunlight, it is probably more like 50mA.
   when charging for about 10 hours on an average of 5mA this equals only 50mAh which powers the LEDs on reduced brightness for about two hours (assuming 25mA current). todo: test this some more
@@ -38,15 +38,15 @@ Notes & Calculations:
     the run times during wakeup are: 7.6+0.3ms in run mode 820us in power up mode (charging the cap of the accelerometer at about 17mA) and 250ms in low power with the accelerometer on
     the wake period is followed by 1000ms of low power sleep at 8.5uA
     that totals in approximately 9.5ms*8.5mA+250ms*0.25mA+1000*0.0085mA = 152mAms resulting in an average current of 120uA
-  
+
   At the average current of 120uA a 500mAh battery will last almost half a year if not re-charged (consumption of 2.88mAh per day)
   A solar panel delivering just 5mA for a few hours a day is enough to slowly charge the battery!
   Small 5.5V solar panels deliver a lot more power than this if placed in sunlight. Even on an overcast sky the 5mA are easily reached.
 
 
-todo:
+  todo:
   -could add a battery charge monitoring function that checks the voltage difference in intervals of 1h and if it never rises goes into an ultra low power mode, saving the battery if there is no power source available (i.e. it is not placed somewhere bright)
-  
+
 */
 
 
@@ -65,7 +65,7 @@ ADXL345 adxl = ADXL345();
 //#define SERIALDEBUG 1 //serial output debugging data if defined
 
 #define AUTOONATDAWN 1 //comment out this line if you do not want the light to automatically turn on at dawn
-#define AUTOPOWEROFFTIME 120 //time in minutes after which the light turns off automatically
+#define AUTOPOWEROFFTIME 180 //time in minutes after which the light turns off automatically
 
 #define LED_PIN     7 //LED data pin
 #define LEDPWR_PIN  6 //LED power pin (inverting, low means on)
@@ -104,6 +104,7 @@ bool doubletap_detect = false;
 
 bool voltageLow = false;
 long ontimeCounter = 0; //counter to track on-time
+unsigned int minutecounter = 0; //approximately counts the on-time minutes (derived from ontimeCounter)
 int lowPowerCheckCounter = 0; //counter to check voltages when not running (for auto-on mode), incremented after low power sleep (~every 2 seconds)
 byte switchoffcounter = 0; //switch off if turned upside down for more than one second
 
@@ -117,7 +118,7 @@ CRGB leds[NUM_LEDS]; //data array for the RGB colors (these are sent out to the 
 
 
 void setup() {
-  
+
 #ifdef SERIALDEBUG
   Serial.begin(115200);
   Serial.println("Garden Jar Light V1.0");
@@ -144,7 +145,8 @@ void loop()
   if (running)
   {
     wdt_reset(); //kick the watchdog timer signalling the main loop is still running
-    ontimeCounter++; //increment the on-time
+    ontimeCounter++; //increment the on-time, main loop runs at 44Hz in normal mode and at 260Hz in candle mode
+
     // Accelerometer Readings
     int x, y, z;
     adxl.readAccel(&x, &y, &z);         // Read the accelerometer values and store them in variables declared above x,y,z
@@ -185,7 +187,7 @@ void loop()
       if (ledmode > LASTMODE)
         ledmode = 0;
 
-      
+
     }
     if (gravitycolor_active)
     {
@@ -247,11 +249,20 @@ void loop()
       case STATICMODE:
         staticUpdate();
         powerDown(WDTO_15MS);
-        //  LowPower.powerDown(SLEEP_15MS, ADC_OFF, BOD_OFF);
+        if (ontimeCounter % 44 == 0) //execuded about once every minute or so
+        {
+          minutecounter++;
+          checkVoltages(); //check input voltages (and determine day and night time)
+        }
         break;
       case CANDLEMODE:
         candleUpdate(ledcolor_hsv.h); //candle with current led color as base hue
         delay(3);
+        if (ontimeCounter % 160 == 0) //candle mode runs at about 160Hz
+        {
+          minutecounter++;
+          checkVoltages(); //check input voltages (and determine day and night time)
+        }
         break;
       //add other modes here
       default:
@@ -259,7 +270,10 @@ void loop()
         break;
     }
 
-
+    if (voltageLow)
+    {
+      lowVoltageWarning(); //blink and shutdown
+    }
 
     delaycounter++;
 
@@ -270,16 +284,9 @@ void loop()
       powerDown(WDTO_4S);
     }
 
-    if (ontimeCounter % 256 == 0) //execuded about once every minute or so
-    {
-      checkVoltages(); //check input voltages (and determine day and night time)
-      if (voltageLow)
-      {
-        lowVoltageWarning(); //blink and shutdown
-      }
-    }
-    
-    if ((ontimeCounter/256/1000) > AUTOPOWEROFFTIME)
+
+
+    if (minutecounter > AUTOPOWEROFFTIME)
     {
       switchLEDoff(true);
     }
@@ -319,6 +326,7 @@ void loop()
       tap_detect = false;
       doubletap_detect = false;
       ontimeCounter = 0; //reset on-time
+      minutecounter = 0; //reset minute counter
     }
     else //no wakup shaking detected, go back to sleep
     {
@@ -336,7 +344,7 @@ void loop()
 
       lowPowerCheckCounter++;
 
-      if (lowPowerCheckCounter > 60) //check once every two minutes (or every 8 minutes if battery voltage is low)
+      if (lowPowerCheckCounter > 60) //check about once every minute (or every 8 minutes if battery voltage is low)
       {
         lowPowerCheckCounter = 0;
         checkVoltages(); //check input voltages (and determine day and night time)
