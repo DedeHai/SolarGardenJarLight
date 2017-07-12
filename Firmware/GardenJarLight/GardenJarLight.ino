@@ -65,7 +65,7 @@ ADXL345 adxl = ADXL345();
 //#define SERIALDEBUG 1 //serial output debugging data if defined
 
 #define AUTOONATDAWN 1 //comment out this line if you do not want the light to automatically turn on at dawn
-#define AUTOPOWEROFFTIME 180 //time in minutes after which the light turns off automatically
+#define AUTOPOWEROFFTIME 240 //time in minutes after which the light turns off automatically
 
 #define LED_PIN     7 //LED data pin
 #define LEDPWR_PIN  6 //LED power pin (inverting, low means on)
@@ -122,6 +122,7 @@ void setup() {
 #ifdef SERIALDEBUG
   Serial.begin(115200);
   Serial.println("Garden Jar Light V1.0");
+  delay(10);
 #endif
 
 
@@ -163,11 +164,12 @@ void loop()
 
     // Output Results to Serial
 #ifdef SERIALDEBUG
-    Serial.print(x);
-    Serial.print(", ");
-    Serial.print(y);
-    Serial.print(", ");
-    Serial.println(z);
+    
+        Serial.print(x);
+        Serial.print(", ");
+        Serial.print(y);
+        Serial.print(", ");
+        Serial.println(z);
 #endif
 
     ADXL_ISR(); //check accelerometer interrupts by polling
@@ -249,19 +251,21 @@ void loop()
       case STATICMODE:
         staticUpdate();
         powerDown(WDTO_15MS);
-        if (ontimeCounter % 44 == 0) //execuded about once every minute or so
+        if (ontimeCounter % (44*60) == 0) //execuded about once every minute, normal mode runs at 44Hz
         {
           minutecounter++;
-          checkVoltages(); //check input voltages (and determine day and night time)
+          checkVoltages(); //check battery voltage once per minute
+
         }
         break;
       case CANDLEMODE:
         candleUpdate(ledcolor_hsv.h); //candle with current led color as base hue
         delay(3);
-        if (ontimeCounter % 160 == 0) //candle mode runs at about 160Hz
+        if (ontimeCounter % (300*60) == 0) //candle mode runs at about 300Hz
         {
           minutecounter++;
-          checkVoltages(); //check input voltages (and determine day and night time)
+          checkVoltages(); //check battery voltage once per minute
+        
         }
         break;
       //add other modes here
