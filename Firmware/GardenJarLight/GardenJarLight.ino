@@ -65,7 +65,7 @@ ADXL345 adxl = ADXL345();
 //#define SERIALDEBUG 1 //serial output debugging data if defined
 
 #define AUTOONATDAWN 1 //comment out this line if you do not want the light to automatically turn on at dawn
-#define AUTOPOWEROFFTIME 240 //time in minutes after which the light turns off automatically
+#define AUTOPOWEROFFTIME 300 //time in minutes after which the light turns off automatically
 
 #define LED_PIN     7 //LED data pin
 #define LEDPWR_PIN  6 //LED power pin (inverting, low means on)
@@ -77,7 +77,7 @@ ADXL345 adxl = ADXL345();
 
 #define COLOR_ORDER GRB
 #define CHIPSET     WS2812B
-#define NUM_LEDS    3
+#define NUM_LEDS    3 //number of leds connected-
 
 #define BRIGHTNESS  255 //global brightness setting
 #define FRAMES_PER_SECOND 60
@@ -187,7 +187,12 @@ void loop()
       led_state = STATE_CHANGECOLOR; //go to color changing mode upon double tap
       ledmode++;
       if (ledmode > LASTMODE)
-        ledmode = 0;
+      {
+        ledmode = 0; 
+         //also set high brightness and full saturation
+         ledcolor_hsv.v = 255;
+         ledcolor_hsv.s = 255;
+      }
 
 
     }
