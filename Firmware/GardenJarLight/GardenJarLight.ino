@@ -65,7 +65,7 @@ ADXL345 adxl = ADXL345();
 //#define SERIALDEBUG 1 //serial output debugging data if defined
 
 #define AUTOONATDAWN 1 //comment out this line if you do not want the light to automatically turn on at dawn
-#define AUTOPOWEROFFTIME 300 //time in minutes after which the light turns off automatically
+#define AUTOPOWEROFFTIME 180 //time in minutes after which the light turns off automatically (default: 3h)
 
 #define LED_PIN     7 //LED data pin
 #define LEDPWR_PIN  6 //LED power pin (inverting, low means on)
@@ -73,14 +73,12 @@ ADXL345 adxl = ADXL345();
 #define BATTERYVOLTAGE_PIN A0
 #define SOLARVOLTAGE_PIN A1
 
-
-
 #define COLOR_ORDER GRB
 #define CHIPSET     WS2812B
 #define NUM_LEDS    3 //number of leds connected-
 
-#define BRIGHTNESS  255 //global brightness setting
-#define FRAMES_PER_SECOND 60
+#define BRIGHTNESS  255 //manual-on brightness setting
+#define AUTOONBRIGHTNESS  160 //auto-on brightness setting
 
 
 #define STATE_CHANGECOLOR     0
@@ -133,7 +131,7 @@ void setup() {
   ledcolor_hsv.v = 255;
   analogReference(INTERNAL);
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness( BRIGHTNESS );
+  FastLED.setBrightness(BRIGHTNESS);
 
   powerDown(WDTO_2S); //wait 2 seconds in low power mode in case the ADXL345 is broken and the system reboots due to watchdog timeout this will save a lot of power, preventing the battery to die
 
@@ -146,7 +144,7 @@ void loop()
   if (running)
   {
     wdt_reset(); //kick the watchdog timer signalling the main loop is still running
-    ontimeCounter++; //increment the on-time, main loop runs at 44Hz in normal mode and at 260Hz in candle mode
+    ontimeCounter++; //increment the on-time, main loop runs at 44Hz in normal mode and at 300Hz in candle mode
 
     // Accelerometer Readings
     int x, y, z;
@@ -308,8 +306,6 @@ void loop()
      LOW POWER MODE STARTS HERE
    *****************************/
 
-
-
   else //low power mode, check accelerometer every 2 seconds
   {
 
@@ -328,26 +324,23 @@ void loop()
     }
     if (wakeup)
     {
+      FastLED.setBrightness(BRIGHTNESS); //set default brightness
       switchLEDon(true);
-      delay(50); //wait for accelerometer to calm down
+      powerDown(WDTO_2S); //wait for accelerometer to calm down
       ADXL_ISR(); //clear interrupts
       led_state = STATE_CHANGECOLOR;
       tap_detect = false;
       doubletap_detect = false;
-      ontimeCounter = 0; //reset on-time
-      minutecounter = 0; //reset minute counter
     }
     else //no wakup shaking detected, go back to sleep
     {
       adxl_powerdown(); //set accelerometer power power and I2C pins low
       if (voltageLow)
       {
-        //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF); //use long sleep time when voltage is low to save energy for the blinking action
         powerDown(WDTO_8S);
       }
       else
       {
-        // LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF); //sleep to save power when LED is off
         powerDown(WDTO_1S);
       }
 
@@ -355,8 +348,9 @@ void loop()
 
       if (lowPowerCheckCounter > 60) //check about once every minute (or every 8 minutes if battery voltage is low)
       {
+      
         lowPowerCheckCounter = 0;
-        checkVoltages(); //check input voltages (and determine day and night time)
+        checkVoltages(); //check input voltages (and determine day and night time, switch on if dark for some time)
         if (voltageLow)
         {
           lowVoltageWarning(); //blink as a warning every 8 minutes if voltage is low
