@@ -26,7 +26,7 @@
    Functions to monitor solar cell and battery voltages
    input voltage has a 11:1 voltage divider (10M and 1M resistor) and the internal reference voltage is 1.1V
 */
-#define VOLTAGEATDAWN 1200 //solar cell voltage threshold indicating it is now dark outside
+#define VOLTAGEATDAWN 1000 //solar cell voltage threshold indicating it is now dark outside
 #define BATTERYMINVOLTAGE 3900 //battery voltage in mV when the auto-on at dawn will switch off 
 #define BATTERYONVOLTAGE 3950 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
 #define BATTERYCRITICALVOLTAGE 3700 //critical battery voltage in mV, below this, accelerometer is not checked anymore, low power interval is maximized (battery is almost empty if this dicharge voltage is reached)

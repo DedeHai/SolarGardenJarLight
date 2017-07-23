@@ -65,7 +65,7 @@ ADXL345 adxl = ADXL345();
 //#define SERIALDEBUG 1 //serial output debugging data if defined
 
 #define AUTOONATDAWN 1 //comment out this line if you do not want the light to automatically turn on at dawn
-#define AUTOPOWEROFFTIME 180 //time in minutes after which the light turns off automatically (default: 3h)
+#define AUTOPOWEROFFTIME 250 //time in minutes after which the light turns off automatically (default: 3h)
 
 #define LED_PIN     7 //LED data pin
 #define LEDPWR_PIN  6 //LED power pin (inverting, low means on)
@@ -78,7 +78,7 @@ ADXL345 adxl = ADXL345();
 #define NUM_LEDS    3 //number of leds connected-
 
 #define BRIGHTNESS  255 //manual-on brightness setting
-#define AUTOONBRIGHTNESS  160 //auto-on brightness setting
+#define AUTOONBRIGHTNESS  180 //auto-on brightness setting
 
 
 #define STATE_CHANGECOLOR     0

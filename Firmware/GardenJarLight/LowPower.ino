@@ -63,7 +63,7 @@ ISR (WDT_vect)
   {
     lowpowerwait = false;
     sleep_disable(); //disable sleep mode
-    wdt_enable(WDTO_250MS); //enable watchdog during normal operation, will restart the sketch if it expires (we are not in sleep mode now)
+    wdt_enable(WDTO_4S); //enable watchdog during normal operation, will restart the sketch if it expires (we are not in sleep mode now)
     WDTCSR |= (1<<WDIE); //enable watchdog interrupt
     WDTCSR &= ~(1<< WDE); //disable automatic system reset (the bootloader does not support it and will get stuck in infinite reboot-loop, restart the sketch instead)
   }
