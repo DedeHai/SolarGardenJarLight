@@ -28,8 +28,8 @@
 */
 #define VOLTAGEATDAWN 900 //solar cell voltage threshold indicating it is now dark outside
 #define BATTERYMINVOLTAGE 3800 //battery voltage in mV when the auto-on at dawn will switch off 
-#define BATTERYONVOLTAGE 3950 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
-#define BATTERYCRITICALVOLTAGE 3700 //critical battery voltage in mV, below this, accelerometer is not checked anymore, low power interval is maximized (battery is almost empty if this dicharge voltage is reached)
+#define BATTERYONVOLTAGE 3900 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
+#define BATTERYCRITICALVOLTAGE 3600 //critical battery voltage in mV, below this, accelerometer is not checked anymore, low power interval is maximized (battery is almost empty if this dicharge voltage is reached)
 
 
 //voltage in [mV]
