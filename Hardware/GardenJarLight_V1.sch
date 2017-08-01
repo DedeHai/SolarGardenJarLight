@@ -9807,7 +9807,7 @@ Vout = Vin/11</text>
 <text x="280.67" y="19.05" size="2.54" layer="94">Bäschteler Design</text>
 <text x="280.67" y="7.62" size="2.1844" layer="94">bashtelorofscience.wordpress.com
 by Damian Schneider</text>
-<text x="280.67" y="15.24" size="2.1844" layer="94">Tiny line following robot</text>
+<text x="280.67" y="15.24" size="2.1844" layer="94">Solar Garden Jar Light</text>
 <text x="331.47" y="20.32" size="2.54" layer="94">Solar Garden Jar Light</text>
 <text x="302.26" y="66.04" size="1.778" layer="94">Arduino Pro Mini</text>
 </plain>

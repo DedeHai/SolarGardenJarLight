@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="mm" unit="mm" style="lines" multiple="1" display="yes" altdistance="0.05" altunitdist="mm" altunit="mm"/>
+<grid distance="0.2" unitdist="mm" unit="mm" style="lines" multiple="1" display="yes" altdistance="0.05" altunitdist="mm" altunit="mm"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -23,21 +23,21 @@
 <layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
 <layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
 <layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
-<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
-<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
-<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
-<layer number="20" name="Dimension" color="13" fill="1" visible="yes" active="yes"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="yes"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="no" active="yes"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="no" active="yes"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="yes"/>
+<layer number="20" name="Dimension" color="13" fill="1" visible="no" active="yes"/>
 <layer number="21" name="tPlace" color="7" fill="1" visible="no" active="yes"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="yes"/>
 <layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="yes"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="25" name="tNames" color="7" fill="1" visible="no" active="yes"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="yes"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
 <layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="28" name="bValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
-<layer number="30" name="bStop" color="7" fill="6" visible="yes" active="yes"/>
+<layer number="30" name="bStop" color="7" fill="6" visible="no" active="yes"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="yes"/>
 <layer number="32" name="bCream" color="7" fill="5" visible="no" active="yes"/>
 <layer number="33" name="tFinish" color="6" fill="3" visible="no" active="yes"/>
@@ -143,17 +143,17 @@
 <layer number="222" name="222bmp" color="23" fill="1" visible="no" active="no"/>
 <layer number="223" name="223bmp" color="24" fill="1" visible="no" active="no"/>
 <layer number="224" name="224bmp" color="25" fill="1" visible="no" active="no"/>
-<layer number="225" name="225bmp" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="226" name="226bmp" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="227" name="227bmp" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="228" name="228bmp" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="229" name="229bmp" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="230" name="230bmp" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="225" name="225bmp" color="7" fill="1" visible="no" active="yes"/>
+<layer number="226" name="226bmp" color="7" fill="1" visible="no" active="yes"/>
+<layer number="227" name="227bmp" color="7" fill="1" visible="no" active="yes"/>
+<layer number="228" name="228bmp" color="7" fill="1" visible="no" active="yes"/>
+<layer number="229" name="229bmp" color="7" fill="1" visible="no" active="yes"/>
+<layer number="230" name="230bmp" color="7" fill="1" visible="no" active="yes"/>
 <layer number="231" name="Eagle3D_PG1" color="7" fill="1" visible="no" active="no"/>
 <layer number="232" name="Eagle3D_PG2" color="7" fill="1" visible="no" active="no"/>
 <layer number="233" name="Eagle3D_PG3" color="7" fill="1" visible="no" active="no"/>
-<layer number="248" name="Housing" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="249" name="Edge" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="248" name="Housing" color="7" fill="1" visible="no" active="yes"/>
+<layer number="249" name="Edge" color="7" fill="1" visible="no" active="yes"/>
 <layer number="250" name="Descript" color="3" fill="1" visible="no" active="no"/>
 <layer number="251" name="SMDround" color="12" fill="11" visible="no" active="no"/>
 <layer number="254" name="cooling" color="7" fill="1" visible="no" active="yes"/>
@@ -3785,6 +3785,35 @@ GARDEN JAR LIGHT V1</text>
 <wire x1="50" y1="0" x2="50" y2="50" width="0.1" layer="49"/>
 <wire x1="50" y1="50" x2="0" y2="50" width="0.1" layer="49"/>
 <wire x1="0" y1="50" x2="0" y2="0" width="0.1" layer="49"/>
+<text x="5.53" y="20.6" size="1.778" layer="26" font="vector" ratio="20" rot="MR270" align="center">+</text>
+<circle x="5.53" y="20.42" radius="1" width="0.3" layer="26"/>
+<text x="7.88" y="24.27" size="1.016" layer="26" font="vector" ratio="20" rot="SMR90" align="center">BATTERY</text>
+<text x="5.52" y="28.08" size="1.778" layer="26" font="vector" ratio="20" rot="MR270" align="center">-</text>
+<circle x="5.52" y="27.9" radius="1" width="0.3" layer="26"/>
+<text x="43.42" y="45.33" size="1.778" layer="26" font="vector" ratio="20" rot="MR270" align="center">+</text>
+<circle x="43.43" y="45.17" radius="1" width="0.3" layer="26"/>
+<text x="42.18" y="41.95" size="1.016" layer="26" font="vector" ratio="20" rot="MR90" align="center">SOLAR</text>
+<text x="44.8" y="9.5" size="1.016" layer="26" font="vector" ratio="20" rot="SMR0" align="center">SOLAR</text>
+<text x="43.94" y="5.21" size="1.778" layer="26" font="vector" ratio="20" rot="MR180" align="center">-</text>
+<circle x="44.12" y="5.18" radius="1" width="0.3" layer="26"/>
+<polygon width="0.1" layer="25">
+<vertex x="27" y="21.8"/>
+<vertex x="29.8" y="23.2"/>
+<vertex x="29.6" y="22.2"/>
+<vertex x="32.4" y="22.2"/>
+<vertex x="32.4" y="21.4"/>
+<vertex x="29.6" y="21.4"/>
+<vertex x="29.8" y="20.4"/>
+</polygon>
+<polygon width="0.1" layer="25">
+<vertex x="16.4" y="21.8"/>
+<vertex x="19.2" y="23.2"/>
+<vertex x="19" y="22.2"/>
+<vertex x="21.8" y="22.2"/>
+<vertex x="21.8" y="21.4"/>
+<vertex x="19" y="21.4"/>
+<vertex x="19.2" y="20.4"/>
+</polygon>
 </plain>
 <libraries>
 <library name="resistor">
