@@ -27,9 +27,10 @@
    input voltage has a 11:1 voltage divider (10M and 1M resistor) and the internal reference voltage is 1.1V
 */
 #define VOLTAGEATDAWN 900 //solar cell voltage threshold indicating it is now dark outside
+#define VOLTAGEDAYLIGHT 3000 //solar cell voltage threshold to determine broad daylight
 #define BATTERYMINVOLTAGE 3800 //battery voltage in mV when the auto-on at dawn will switch off 
-#define BATTERYONVOLTAGE 3900 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
-#define BATTERYCRITICALVOLTAGE 3600 //critical battery voltage in mV, below this, accelerometer is not checked anymore, low power interval is maximized (battery is almost empty if this dicharge voltage is reached)
+#define BATTERYONVOLTAGE 3850 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
+#define BATTERYCRITICALVOLTAGE 3500 //critical battery voltage in mV, below this, accelerometer is not checked anymore, low power interval is maximized (battery is almost empty if this dicharge voltage is reached)
 
 
 //voltage in [mV]
@@ -64,6 +65,14 @@ unsigned int getSolarVoltage(void)
 bool checkDarkness(void)
 {
   if (getSolarVoltage() < (unsigned int)VOLTAGEATDAWN)
+    return true;
+  else
+    return false;
+}
+
+bool checkBroadDaylight(void)
+{
+  if (getSolarVoltage() > (unsigned int)VOLTAGEDAYLIGHT)
     return true;
   else
     return false;
@@ -126,6 +135,14 @@ void checkVoltages(void)
     {
       autoOn = false; //reset for next time it gets dark
     }
+  }
+  else //light is running, check if it is bright daylight outside, switch off if it is
+  {
+    if(checkBroadDaylight())
+    {
+       switchLEDoff(true); //fadeout and shut down 
+    }
+    
   }
 
   if (checkAutoOff() && autoOn) //check for minimum auto-mode battery voltage
