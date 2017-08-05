@@ -183,6 +183,7 @@ void ADXL_ISR() {
     if (gravitycolor_active == false) //if inactive before, go to color changing mode
     {
       led_state = STATE_CHANGECOLOR;
+      tap_detect = false;
     }
     gravitycolor_active = true;
 
