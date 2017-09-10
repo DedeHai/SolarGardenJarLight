@@ -47,7 +47,7 @@ void switchLEDoff(bool usefadeout)
   running = false;
   autoOn = true; //was running, let the daylight reset this variable to false (i.e. do not switch back on if it is dark outside)
   pinMode(LEDPWR_PIN, INPUT);
-  digitalWrite(LEDPWR_PIN, HIGH); //LEDs OFF  //todo: with a pullup, make this an input and only make it an output when running
+  digitalWrite(LEDPWR_PIN, HIGH); //LEDs OFF  
   adxl_powerdown(); //set accelerometer power power and I2C pins low
 }
 
@@ -95,6 +95,7 @@ void lowVoltageWarning(void) {
     updateLEDs(warnincolor);
     //   LowPower.powerDown(SLEEP_250MS, ADC_OFF, BOD_OFF);
     powerDown(WDTO_250MS);
+    wdt_reset(); //kick the watchdog
   }
   switchLEDoff(false);
 }

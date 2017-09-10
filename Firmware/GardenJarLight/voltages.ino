@@ -26,7 +26,7 @@
    Functions to monitor solar cell and battery voltages
    input voltage has a 11:1 voltage divider (10M and 1M resistor) and the internal reference voltage is 1.1V
 */
-#define VOLTAGEATDAWN 900 //solar cell voltage threshold indicating it is now dark outside
+#define VOLTAGEATDAWN 700 //solar cell voltage threshold indicating it is now dark outside
 #define VOLTAGEDAYLIGHT 3000 //solar cell voltage threshold to determine broad daylight
 #define BATTERYMINVOLTAGE 3800 //battery voltage in mV when the auto-on at dawn will switch off 
 #define BATTERYONVOLTAGE 3850 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
@@ -88,17 +88,31 @@ bool checkAutoOff(void)
 
 bool checkLowVoltage(void)
 {
+  static uint8_t lowvoltagecounter = 0; //used to detect low voltage multiple times to make sure it is not just a noise spike
   if (getBatteryVoltage() < BATTERYCRITICALVOLTAGE)
-    return true;
+  {
+    lowvoltagecounter++;
+    if (lowvoltagecounter > 3)
+    {
+      lowvoltagecounter = 4;
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
   else
+  {
+    lowvoltagecounter = 0;
     return false;
+  }
 }
 
 //handle voltage checking, determine day and night time, execute about once per minute
 void checkVoltages(void)
 {
 
-#ifdef AUTOONATDAWN
   //check if it's dark, switch on if it is
 
   //check if it's dark outside (check this once per minute)
@@ -110,10 +124,10 @@ void checkVoltages(void)
     itsDarkOutside--;
   }
 
-#ifdef SERIALDEBUG
-  Serial.print("itsDarkOutside = ");
-  Serial.println(itsDarkOutside);
-#endif
+  //#ifdef SERIALDEBUG
+  //  Serial.print("itsDarkOutside = ");
+  //  Serial.println(itsDarkOutside);
+  //#endif
 
   if (running == false) //only check auto-on if not already running
   {
@@ -138,19 +152,12 @@ void checkVoltages(void)
   }
   else //light is running, check if it is bright daylight outside, switch off if it is
   {
-    if(checkBroadDaylight())
+    if (checkBroadDaylight())
     {
-       switchLEDoff(true); //fadeout and shut down 
+      switchLEDoff(true); //fadeout and shut down
     }
-    
-  }
 
-  if (checkAutoOff() && autoOn) //check for minimum auto-mode battery voltage
-  {
-    switchLEDoff(true); //fadeout and shut down
   }
-
-#endif
 
   if (checkLowVoltage())
   {
@@ -160,5 +167,11 @@ void checkVoltages(void)
   {
     voltageLow = false;
   }
+
+  if (checkAutoOff() && autoOn && voltageLow == false) //check for minimum auto-mode battery voltage (only switch off if voltage is not low, let the main show the warning, then switch off)
+  {
+    switchLEDoff(true); //fadeout and shut down
+  }
+
 }
 

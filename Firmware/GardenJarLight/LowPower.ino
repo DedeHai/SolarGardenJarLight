@@ -102,6 +102,5 @@ void powerDown(uint8_t period)
  //sleep_disable();    //sleep disable is called in the WDT interrupt
   sei();
   ADCSRA |= (1 << ADEN); //power up the ADC
-  
 }
 

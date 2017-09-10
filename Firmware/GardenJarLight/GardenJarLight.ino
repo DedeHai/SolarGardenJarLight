@@ -64,7 +64,6 @@ ADXL345 adxl = ADXL345();
 
 //#define SERIALDEBUG 1 //serial output debugging data if defined
 
-#define AUTOONATDAWN 1 //comment out this line if you do not want the light to automatically turn on at dawn
 #define AUTOPOWEROFFTIME 300 //time in minutes after which the light turns off automatically (default: 5h)
 
 #define LED_PIN     7 //LED data pin
@@ -123,6 +122,12 @@ void setup() {
   delay(10);
 #endif
 
+  //blink the LED on the arduino on bootup (to check if it is constantly rebooting, hunting a bug where the light does not react to shaking until reset is pressed)
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH);
+  delay(200);
+  digitalWrite(13, LOW);
+  pinMode(13, INPUT);
 
   pinMode(LEDPWR_PIN, INPUT);
   digitalWrite(LEDPWR_PIN, HIGH); //LEDs OFF  //todo: with a pullup, make this an input and only make it an output when running
@@ -162,12 +167,12 @@ void loop()
 
     // Output Results to Serial
 #ifdef SERIALDEBUG
-    
-        Serial.print(x);
-        Serial.print(", ");
-        Serial.print(y);
-        Serial.print(", ");
-        Serial.println(z);
+
+    Serial.print(x);
+    Serial.print(", ");
+    Serial.print(y);
+    Serial.print(", ");
+    Serial.println(z);
 #endif
 
     ADXL_ISR(); //check accelerometer interrupts by polling
@@ -186,10 +191,10 @@ void loop()
       ledmode++;
       if (ledmode > LASTMODE)
       {
-        ledmode = 0; 
-         //also set high brightness and full saturation
-         ledcolor_hsv.v = 255;
-         ledcolor_hsv.s = 255;
+        ledmode = 0;
+        //also set high brightness and full saturation
+        ledcolor_hsv.v = 255;
+        ledcolor_hsv.s = 255;
       }
 
 
@@ -254,21 +259,20 @@ void loop()
       case STATICMODE:
         staticUpdate();
         powerDown(WDTO_15MS);
-        if (ontimeCounter % (44*60) == 0) //execuded about once every minute, normal mode runs at 44Hz
+        if (ontimeCounter % (44 * 60) == 0) //execuded about once every minute, normal mode runs at 44Hz
         {
           minutecounter++;
           checkVoltages(); //check battery voltage once per minute
-
         }
         break;
       case CANDLEMODE:
         candleUpdate(ledcolor_hsv.h); //candle with current led color as base hue
         delay(3);
-        if (ontimeCounter % (300*60) == 0) //candle mode runs at about 300Hz
+        if (ontimeCounter % (300 * 60) == 0) //candle mode runs at about 300Hz
         {
           minutecounter++;
           checkVoltages(); //check battery voltage once per minute
-        
+
         }
         break;
       //add other modes here
@@ -277,10 +281,7 @@ void loop()
         break;
     }
 
-    if (voltageLow)
-    {
-      lowVoltageWarning(); //blink and shutdown
-    }
+
 
     delaycounter++;
 
@@ -292,12 +293,15 @@ void loop()
     }
 
 
-
     if (minutecounter > AUTOPOWEROFFTIME)
     {
       switchLEDoff(true);
     }
 
+    if (voltageLow)
+    {
+      lowVoltageWarning(); //blink and shutdown
+    }
 
   }
 
@@ -312,7 +316,7 @@ void loop()
 #ifdef SERIALDEBUG
     delay(10); //wait for serial prints to finish
 #endif
-
+    wakeup = false; //reset wakeup variable
     if (voltageLow == false) //battery voltage is ok, check accelerometer
     {
       adxl_setup(); //startup the accelerometer
@@ -331,6 +335,7 @@ void loop()
       led_state = STATE_CHANGECOLOR;
       tap_detect = false;
       doubletap_detect = false;
+      autoOn = false; //this is a manual on
     }
     else //no wakup shaking detected, go back to sleep
     {
@@ -348,7 +353,7 @@ void loop()
 
       if (lowPowerCheckCounter > 60) //check about once every minute (or every 8 minutes if battery voltage is low)
       {
-      
+
         lowPowerCheckCounter = 0;
         checkVoltages(); //check input voltages (and determine day and night time, switch on if dark for some time)
         if (voltageLow)
