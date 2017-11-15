@@ -115,6 +115,11 @@ CRGB leds[NUM_LEDS]; //data array for the RGB colors (these are sent out to the 
 
 
 void setup() {
+  
+  MCUSR = 0; //reset MCU status reset register (must be cleared to disable watchdog reset, this may also be called in arduino core, did not check)
+  WDTCSR |= (1<<WDCE); //watchdog change enable, must be set to be able to clear WDE bit
+  WDTCSR &= ~(1 << WDE); //disable watchdog resetting the system (must be cleared after WDRF is cleared in MCUSR)
+  wdt_disable(); //disable the watchdog timer (in case the watchdog did reset the system)
 
 #ifdef SERIALDEBUG
   Serial.begin(115200);
@@ -322,7 +327,6 @@ void loop()
       adxl_setup(); //startup the accelerometer
       ADXL_ISR(); //check accelerometer interrupts by polling
       wakeup = false;
-      //LowPower.powerDown(SLEEP_250MS, ADC_OFF, BOD_OFF);
       powerDown(WDTO_250MS);
       ADXL_ISR(); //check accelerometer interrupts by polling (sets wakeup if shaking is detected)
     }
@@ -339,6 +343,7 @@ void loop()
     }
     else //no wakup shaking detected, go back to sleep
     {
+      
       adxl_powerdown(); //set accelerometer power power and I2C pins low
       if (voltageLow)
       {

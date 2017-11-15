@@ -58,22 +58,30 @@ bool lowpowerwait = false; //set to true during low power wait, used for watchdo
 ISR (WDT_vect)
 {
   //disable the watchdog timer upon wakeup
-  wdt_disable();
+ wdt_disable();
+  
   if(lowpowerwait)
-  {
+  { 
     lowpowerwait = false;
     sleep_disable(); //disable sleep mode
     wdt_enable(WDTO_4S); //enable watchdog during normal operation, will restart the sketch if it expires (we are not in sleep mode now)
-    WDTCSR |= (1<<WDIE); //enable watchdog interrupt
+    WDTCSR |= (1<<WDCE); //watchdog change enable, must be set to be able to clear WDE bit
     WDTCSR &= ~(1<< WDE); //disable automatic system reset (the bootloader does not support it and will get stuck in infinite reboot-loop, restart the sketch instead)
+    WDTCSR |= (1<<WDIE); //enable watchdog interrupt   
   }
   else //watchdog triggered during normal operation, something bad has happened (stuck in infinite loop, probably due to I2C error)
   {
-    //disable the I2C module (just in case)
-    TWCR &= ~(1<< TWEN);
+    //disable the I2C module and clear interrupt and the interrupt flag (just in case)
+    TWCR &= ~((1<< TWEN)|(1<< TWIE));
+    TWCR |= (1<< TWINT);
+
+    WDTCSR |= (1<<WDCE); //watchdog change enable, must be set to be able to clear WDE bit 
+    WDTCSR &= ~(1<< WDE); //disable automatic system reset (the bootloader does not support it and will get stuck in infinite reboot-loop, restart the sketch instead)
+    WDTCSR |= (1 << WDIE); //enable the watchdog interrupt (prevents the watchdog from resetting the system and running the interrupt routine instead, just a precaution)
     //start the sketch from the beginning
-    asm volatile ("  jmp 0");  
-  }
+    asm volatile ("jmp 0");  
+  } 
+  
 }
 
 void powerDown(uint8_t period)
@@ -82,25 +90,27 @@ void powerDown(uint8_t period)
   ADCSRA &= ~(1 << ADEN); //power down the ADC
   wdt_enable(period);
   WDTCSR |= (1 << WDIE);
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN); \
-  cli();        \
-  sleep_enable();   \
+  WDTCSR |= (1<<WDCE); //watchdog change enable, must be set to be able to clear WDE bit
+  WDTCSR &= ~(1<< WDE); //disable automatic system reset (the bootloader does not support it and will get stuck in infinite reboot-loop, restart the sketch instead)
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN); 
+  cli();        
+  sleep_enable();   
   //sleep_bod_disable(); //function from core library, is not always available... code copied here
-  unsigned char tempreg;                           \
-  __asm__ __volatile__("in %[tempreg], %[mcucr]" "\n\t"       \
-                       "ori %[tempreg], %[bods_bodse]" "\n\t"     \
-                       "out %[mcucr], %[tempreg]" "\n\t"      \
-                       "andi %[tempreg], %[not_bodse]" "\n\t"     \
-                       "out %[mcucr], %[tempreg]"           \
-                       : [tempreg] "=&d" (tempreg)          \
-                       : [mcucr] "I" _SFR_IO_ADDR(MCUCR),       \
-                       [bods_bodse] "i" (_BV(BODS) | _BV(BODSE)), \
-                       [not_bodse] "i" (~_BV(BODSE)));      \
+  unsigned char tempreg;                           
+  __asm__ __volatile__("in %[tempreg], %[mcucr]" "\n\t"       
+                       "ori %[tempreg], %[bods_bodse]" "\n\t"     
+                       "out %[mcucr], %[tempreg]" "\n\t"      
+                       "andi %[tempreg], %[not_bodse]" "\n\t"     
+                       "out %[mcucr], %[tempreg]"           
+                       : [tempreg] "=&d" (tempreg)          
+                       : [mcucr] "I" _SFR_IO_ADDR(MCUCR),       
+                       [bods_bodse] "i" (_BV(BODS) | _BV(BODSE)), 
+                       [not_bodse] "i" (~_BV(BODSE)));      
 
-  sei();        \
-  sleep_cpu();      \
- //sleep_disable();    //sleep disable is called in the WDT interrupt
+  sei();        
+  sleep_cpu();      //go to sleep now
+  sleep_disable();    //disable sleep mode after waking up
   sei();
-  ADCSRA |= (1 << ADEN); //power up the ADC
+  ADCSRA |= (1 << ADEN); //power up the ADC (used to read voltages)
 }
 
