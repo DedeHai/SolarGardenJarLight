@@ -1,4 +1,4 @@
-/*************************
+/*
   SOLAR GARDEN JAR LIGHT
 
   by Damian Schneider
@@ -23,7 +23,7 @@
 /*
   Notes & Calculations:
 
-  This code was tested and working using Arduino 1.6.8
+  This code was tested and working using Arduino 1.6.8 and Arduino 1.8.5
   It works on Arduinos using ATmega328 and ATmega168P (Arduino Pro-Mini)
 
   solar cell power:
@@ -49,9 +49,10 @@
 
 */
 
-
+//#include "Wire_timeout.h" //I2C  with added timeouts on while loops to prevent a watchdog reset if the hardware is bad
+#include <Wire.h>
 #include <FastLED.h>
-#include <Wire.h> //I2C 
+
 #include <SparkFun_ADXL345.h>         // SparkFun ADXL345 Library
 //low power stuff (cannot use low power library as it does not support ATMEGA168P devices)
 #include <avr/sleep.h>
@@ -63,6 +64,7 @@
 ADXL345 adxl = ADXL345();
 
 //#define SERIALDEBUG 1 //serial output debugging data if defined
+#define RANDOMCOLORATWAKEUP 1 //if defined, a random color is assigned at auto-wakeup
 
 #define AUTOPOWEROFFTIME 300 //time in minutes after which the light turns off automatically (default: 5h)
 
@@ -77,7 +79,7 @@ ADXL345 adxl = ADXL345();
 #define NUM_LEDS    3 //number of leds connected-
 
 #define BRIGHTNESS  255 //manual-on brightness setting
-#define AUTOONBRIGHTNESS  210 //auto-on brightness setting
+#define AUTOONBRIGHTNESS  230 //auto-on brightness setting
 
 
 #define STATE_CHANGECOLOR     0
@@ -115,11 +117,11 @@ CRGB leds[NUM_LEDS]; //data array for the RGB colors (these are sent out to the 
 
 
 void setup() {
-  
+
   MCUSR = 0; //reset MCU status reset register (must be cleared to disable watchdog reset, this may also be called in arduino core, did not check)
-  WDTCSR |= (1<<WDCE); //watchdog change enable, must be set to be able to clear WDE bit
+  WDTCSR |= (1 << WDCE); //watchdog change enable, must be set to be able to clear WDE bit
   WDTCSR &= ~(1 << WDE); //disable watchdog resetting the system (must be cleared after WDRF is cleared in MCUSR)
-  wdt_disable(); //disable the watchdog timer (in case the watchdog did reset the system)
+  wdt_disable(); //disable the watchdog timer (in case the watchdog interrupt did reset the system)
 
 #ifdef SERIALDEBUG
   Serial.begin(115200);
@@ -192,6 +194,7 @@ void loop()
     if (doubletap_detect)
     {
       doubletap_detect = false;
+      tap_detect = false;
       led_state = STATE_CHANGECOLOR; //go to color changing mode upon double tap
       ledmode++;
       if (ledmode > LASTMODE)
@@ -340,10 +343,15 @@ void loop()
       tap_detect = false;
       doubletap_detect = false;
       autoOn = false; //this is a manual on
+
     }
-    else //no wakup shaking detected, go back to sleep
+    else //no wakup shaking detected, go back to sleep (or turn led on if it is getting dark outside)
     {
-      
+#ifdef SERIALDEBUG
+      Serial.println("no wakeup signal");
+      delay(50); //wait for serial prints to finish
+      return;//do not go to sleep
+#endif
       adxl_powerdown(); //set accelerometer power power and I2C pins low
       if (voltageLow)
       {

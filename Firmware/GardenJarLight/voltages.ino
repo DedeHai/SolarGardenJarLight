@@ -28,7 +28,7 @@
 */
 #define VOLTAGEATDAWN 700 //solar cell voltage threshold indicating it is now dark outside
 #define VOLTAGEDAYLIGHT 3000 //solar cell voltage threshold to determine broad daylight
-#define BATTERYMINVOLTAGE 3700 //battery voltage in mV when the auto-on at dawn will switch off 
+#define BATTERYMINVOLTAGE 3500 //battery voltage in mV when the auto-on at dawn will switch off 
 #define BATTERYONVOLTAGE 4000 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
 #define BATTERYCRITICALVOLTAGE 3400 //critical battery voltage in mV, below this, accelerometer is not checked anymore, low power interval is maximized (battery is almost empty if this dicharge voltage is reached)
 
@@ -137,6 +137,9 @@ void checkVoltages(void)
       {
         autoOn = true; //automatically turned on the light
         FastLED.setBrightness(AUTOONBRIGHTNESS); //set to lower brightness so the harnessed power lasts longer
+        #ifdef RANDOMCOLORATWAKEUP
+        ledcolor_hsv.h = random(255); //turn on using random color
+        #endif
         switchLEDon(true);
         adxl_setup(); //startup the accelerometer
         //clear interrupts

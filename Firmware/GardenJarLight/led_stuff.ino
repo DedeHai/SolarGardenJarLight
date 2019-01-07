@@ -46,18 +46,23 @@ void switchLEDoff(bool usefadeout)
   ledcolor_hsv.v = startbrightness; //set the global variable back to the previous brightness
   running = false;
   autoOn = true; //was running, let the daylight reset this variable to false (i.e. do not switch back on if it is dark outside)
+
+  pinMode(LED_PIN, INPUT);
+  digitalWrite(LED_PIN, LOW); //LED data pin to high impedance
   pinMode(LEDPWR_PIN, INPUT);
-  digitalWrite(LEDPWR_PIN, HIGH); //LEDs OFF  
+  digitalWrite(LEDPWR_PIN, HIGH); //LEDs OFF
+
   adxl_powerdown(); //set accelerometer power power and I2C pins low
 }
 
 //fade in and go to running mode
 void switchLEDon(bool usefadein)
 {
-  //todo: fade in
   pinMode(LEDPWR_PIN, OUTPUT);
   digitalWrite(LEDPWR_PIN, LOW); //LEDs ON
   delay(2); //wait for led voltage to be stable
+  pinMode(LED_PIN, OUTPUT); //set data pin as output again
+   
   running = true;
   minutecounter = 0; //reset minute counter
   //led fade in to currently set brightness

@@ -44,6 +44,7 @@ void adxl_setup(void)
   //accelerometer setup
 
   adxl.powerOn();                     // Power on the ADXL345
+  powerDown(WDTO_30MS); //wait for power to stabilize
   Wire.setClock(400000); //set hig speed
   
   adxl.setRangeSetting(4);           // Give the range settings
