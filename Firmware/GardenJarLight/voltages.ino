@@ -29,7 +29,7 @@
 #define VOLTAGEATDAWN 700 //solar cell voltage threshold indicating it is now dark outside
 #define VOLTAGEDAYLIGHT 3000 //solar cell voltage threshold to determine broad daylight
 #define BATTERYMINVOLTAGE 3500 //battery voltage in mV when the auto-on at dawn will switch off 
-#define BATTERYONVOLTAGE 4000 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
+#define BATTERYONVOLTAGE 3700 //battery voltage in mV that is (minimally) required to perform auto-switch on at dawn (set to same as BATTERYMINVOLTAGE to always switch on)
 #define BATTERYCRITICALVOLTAGE 3400 //critical battery voltage in mV, below this, accelerometer is not checked anymore, low power interval is maximized (battery is almost empty if this dicharge voltage is reached)
 
 
@@ -109,6 +109,16 @@ bool checkLowVoltage(void)
   }
 }
 
+//map the battery voltage to a brightness level so the light will stay on for the longest time depending on the juice left
+uint8_t getLongrunningBrightness(unsigned int batVoltage)
+{
+   //calculate brightness from battery voltage: at 3.7V use minimum brightness, above 4.1V use high brightness (=AUTOMAXBRIGHTNESS)
+        unsigned int brightnessvalue = map(batVoltage, BATTERYONVOLTAGE, 4250,AUTOMINBRIGHTNESS , AUTOMAXBRIGHTNESS);
+        brightnessvalue = constrain(brightnessvalue, AUTOMINBRIGHTNESS,AUTOMAXBRIGHTNESS);  
+
+        return (uint8_t)brightnessvalue;
+}
+
 //handle voltage checking, determine day and night time, execute about once per minute
 void checkVoltages(void)
 {
@@ -133,13 +143,18 @@ void checkVoltages(void)
   {
     if (itsDarkOutside > 10) //check if dark for more than 10 minutes and not yet run
     {
-      if (autoOn == false && (getBatteryVoltage() > BATTERYONVOLTAGE) )
+      unsigned int currentBatteryVoltage = getBatteryVoltage();
+      if (autoOn == false && (currentBatteryVoltage > BATTERYONVOLTAGE) )
       {
-        autoOn = true; //automatically turned on the light
-        FastLED.setBrightness(AUTOONBRIGHTNESS); //set to lower brightness so the harnessed power lasts longer
-        #ifdef RANDOMCOLORATWAKEUP
+        autoOn = true; //automatically turned on the light       
+        FastLED.setBrightness(getLongrunningBrightness(currentBatteryVoltage)); //set to lower brightness so the harnessed power lasts longer
+
+#ifdef RANDOMCOLORATWAKEUP
         ledcolor_hsv.h = random(255); //turn on using random color
-        #endif
+        ledcolor_hsv.s = 255;  //full color
+        ledcolor_hsv.v = 255;  //full brightness (still limited by global 'setBrightness' value)
+        ledmode = CANDLEMODE;
+#endif
         switchLEDon(true);
         adxl_setup(); //startup the accelerometer
         //clear interrupts

@@ -69,6 +69,13 @@ ISR (WDT_vect)
   }
   else //watchdog triggered during normal operation, something bad has happened (stuck in infinite loop, probably due to I2C error)
   {
+    ADCSRA &= ~(1 << ADEN); //power down the ADC (just in case)
+    wdt_enable(WDTO_4S); //initialize the watchdog
+    WDTCSR |= (1 << WDIE); //enable watchdog interrupt
+    WDTCSR |= (1 << WDCE); //watchdog change enable, must be set to be able to clear WDE bit
+    WDTCSR &= ~(1 << WDE);//disable the watchdog resetting the system, instead run this interrupt which will reboot
+    wdt_disable(); //disable watchdog 
+  
     //disable the I2C module and clear interrupt and the interrupt flag (just in case)
     TWCR &= ~((1 << TWEN) | (1 << TWIE));
     TWCR |= (1 << TWINT);
@@ -109,11 +116,11 @@ void powerDown(uint8_t period)
 }
 
 /*note: if arduino gets stuck in bootloader (some problem with I2C communication that happens on some hardware, did not find the reason why)
- * need to update the twi stop function in the twi.c file in arduino core with a timeout, use this:
- * 
- * void twi_stop(void)
-{
-uint16_t timeout;
+   need to update the twi stop function in the twi.c file in arduino core with a timeout, use this:
+
+   void twi_stop(void)
+  {
+  uint16_t timeout;
   // send stop condition
   TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWEA) | _BV(TWINT) | _BV(TWSTO);
 
@@ -128,7 +135,7 @@ uint16_t timeout;
 
   // update twi state
   twi_state = TWI_READY;
-}
+  }
 */
- 
+
 

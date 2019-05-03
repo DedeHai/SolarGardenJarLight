@@ -26,6 +26,10 @@
   This code was tested and working using Arduino 1.6.8 and Arduino 1.8.5
   It works on Arduinos using ATmega328 and ATmega168P (Arduino Pro-Mini)
 
+  IMPORTANT: to avoid constant reboots upon an I2C error (which sometimes can happen) replace the twi.c file in your arduino folder 
+  (YOURARDUINOLOCATION\hardware\arduino\avr\libraries\Wire\src\utility) with the twi.c file in the zip file provided.
+  it contains my bugfix to not get the arduino stuck in an infinite loop when the accelerometer does not respond
+
   solar cell power:
   the solar cell delivers around 3-5mA when charging in the shade or light overcast. In full sunlight, it is probably more like 50mA.
   when charging for about 10 hours on an average of 5mA this equals only 50mAh which powers the LEDs on reduced brightness for about two hours (assuming 25mA current). todo: test this some more
@@ -49,7 +53,6 @@
 
 */
 
-//#include "Wire_timeout.h" //I2C  with added timeouts on while loops to prevent a watchdog reset if the hardware is bad
 #include <Wire.h>
 #include <FastLED.h>
 
@@ -66,7 +69,7 @@ ADXL345 adxl = ADXL345();
 //#define SERIALDEBUG 1 //serial output debugging data if defined
 #define RANDOMCOLORATWAKEUP 1 //if defined, a random color is assigned at auto-wakeup
 
-#define AUTOPOWEROFFTIME 300 //time in minutes after which the light turns off automatically (default: 5h)
+#define AUTOPOWEROFFTIME 200 //time in minutes after which the light turns off automatically 
 
 #define LED_PIN     7 //LED data pin
 #define LEDPWR_PIN  6 //LED power pin (inverting, low means on)
@@ -78,8 +81,9 @@ ADXL345 adxl = ADXL345();
 #define CHIPSET     WS2812B
 #define NUM_LEDS    3 //number of leds connected-
 
-#define BRIGHTNESS  255 //manual-on brightness setting
-#define AUTOONBRIGHTNESS  230 //auto-on brightness setting
+#define BRIGHTNESS  180 //manual-on brightness setting
+#define AUTOMAXBRIGHTNESS  200 //auto-on maximum brightness setting
+#define AUTOMINBRIGHTNESS  20 //auto-on minimum brightness setting
 
 
 #define STATE_CHANGECOLOR     0
@@ -144,7 +148,7 @@ void setup() {
   analogReference(INTERNAL);
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
   FastLED.setBrightness(BRIGHTNESS);
-
+  randomSeed(getBatteryVoltage()+getBatteryVoltage()+getBatteryVoltage());
   powerDown(WDTO_2S); //wait 2 seconds in low power mode in case the ADXL345 is broken and the system reboots due to watchdog timeout this will save a lot of power, preventing the battery to die
 
 }
@@ -335,7 +339,8 @@ void loop()
     }
     if (wakeup)
     {
-      FastLED.setBrightness(BRIGHTNESS); //set default brightness
+      FastLED.setBrightness(getLongrunningBrightness(getBatteryVoltage()));
+      //FastLED.setBrightness(BRIGHTNESS); //set default brightness
       switchLEDon(true);
       powerDown(WDTO_2S); //wait for accelerometer to calm down
       ADXL_ISR(); //clear interrupts
